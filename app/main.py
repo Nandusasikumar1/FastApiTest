@@ -11,7 +11,7 @@ models.Base.metadata.create_all(bind=engine)
 
 while True:
     try:
-        conn=psycopg2.connect(host='localhost',database='fastapi',user='postgres',password='nandupass',cursor_factory=RealDictCursor)
+        conn=psycopg2.connect(host='localhost',database='fastapi',user='postgres',password='nandupasshash1',cursor_factory=RealDictCursor)
         cursor=conn.cursor()
         print('Database connection was successful')
         break
@@ -28,7 +28,7 @@ def myapi():
     return 'hi nirvikaar how are you'
 
     
-@app.get('/posts')
+@app.get('/posts',response_model=list[schemas.Post])
 def get_posts(db:Session=Depends(get_db)):
  
     posts=db.query(models.Post).all()
@@ -43,10 +43,10 @@ def create_posts(data:schemas.PostCreate,db:Session=Depends(get_db)):
     db.refresh(new_post)
     return new_post
 
-@app.get("/posts/{id}")
+@app.get("/posts/{id}",response_model=schemas.Post)
 def get_post(id:int,db:Session=Depends(get_db)):
    
-    post=db.query(models.Post).filter(models.Post.id==id).all()
+    post=db.query(models.Post).filter(models.Post.id==id).first()
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
         detail=f'post with id : {id} was  not found')
@@ -70,7 +70,7 @@ def delete_post(id:int,db:Session=Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
    
 
-@app.put("/posts/{id}")
+@app.put("/posts/{id}",response_model=schemas.Post)
 def update_post(id:int,data:schemas.PostCreate,db:Session=Depends(get_db)):
   
     post=db.query(models.Post).filter(models.Post.id==id)
